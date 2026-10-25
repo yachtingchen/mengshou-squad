@@ -23,9 +23,9 @@
 | `audio/name-d.mp3` | [En-us-d.ogg](https://commons.wikimedia.org/wiki/File:En-us-d.ogg) | Twocs / Tom Anderson | CC BY-SA 3.0 |
 | `audio/name-e.mp3` | [En-us-e.ogg](https://commons.wikimedia.org/wiki/File:En-us-e.ogg) | Logictheo | CC BY-SA 3.0 |
 | `audio/phoneme-a.mp3` | [Near-open front unrounded vowel.ogg](https://commons.wikimedia.org/wiki/File:Near-open_front_unrounded_vowel.ogg) | Denelson83 | CC BY-SA 3.0 |
-| `audio/phoneme-b.mp3` | [Voiced bilabial plosive.ogg](https://commons.wikimedia.org/wiki/File:Voiced_bilabial_plosive.ogg) | Peter Isotalo | CC BY-SA 3.0 |
-| `audio/phoneme-c.mp3` | [Voiceless velar plosive.ogg](https://commons.wikimedia.org/wiki/File:Voiceless_velar_plosive.ogg) | Peter Isotalo | CC BY-SA 3.0 |
-| `audio/phoneme-d.mp3` | [Voiced alveolar plosive.ogg](https://commons.wikimedia.org/wiki/File:Voiced_alveolar_plosive.ogg) | Peter Isotalo | CC BY-SA 3.0 |
+| `audio/phoneme-b.mp3` | eSpeak NG 合成（原創產出） | eSpeak NG（GPL-3.0 工具；輸出音檔無附加限制） | 本專案原創 |
+| `audio/phoneme-c.mp3` | eSpeak NG 合成（原創產出） | eSpeak NG（GPL-3.0 工具；輸出音檔無附加限制） | 本專案原創 |
+| `audio/phoneme-d.mp3` | eSpeak NG 合成（原創產出） | eSpeak NG（GPL-3.0 工具；輸出音檔無附加限制） | 本專案原創 |
 | `audio/phoneme-e.mp3` | [Open-mid front unrounded vowel.ogg](https://commons.wikimedia.org/wiki/File:Open-mid_front_unrounded_vowel.ogg) | Denelson83（下載版本） | CC BY-SA 3.0 |
 | `audio/says.mp3` | [En-us-says.ogg](https://commons.wikimedia.org/wiki/File:En-us-says.ogg) | Dvortygirl | CC BY-SA 3.0 |
 | `audio/in.mp3` | [En-us-in.ogg](https://commons.wikimedia.org/wiki/File:En-us-in.ogg) | Dvortygirl | CC BY-SA 3.0 |
@@ -34,6 +34,6 @@
 
 ## 加工聲明
 
-2026-10-25 下載原始 Ogg，裁去首尾靜音、統一響度（目標 -19 LUFS／峰值 -2 dBTP），轉為 44.1 kHz 單聲道 128 kbps MP3。音高未改變。B／C／D 音素取原作中間的短子音示範，裁切時間分別為 0.97–1.23、0.88–1.12、0.87–1.13 秒，加入 5／15 ms 的首尾淡化，避免連同前後的母音示範整段播放。A／E 為原始 IPA 母音示範。E 來源下載到 19,160 bytes、約 0.7 秒的 Denelson83 舊錄音版本；來源頁現行版本另有 Terfili 的錄音。
+2026-10-25 下載原始 Ogg，裁去首尾靜音、統一響度（目標 -19 LUFS／峰值 -2 dBTP），轉為 44.1 kHz 單聲道 128 kbps MP3。音高未改變。B／C／D 音素已改用 eSpeak NG 合成短音，再以 ffmpeg 統一響度並轉為 MP3（約 0.6 秒）。A／E 為原始 IPA 母音示範。E 來源下載到 19,160 bytes、約 0.7 秒的 Denelson83 舊錄音版本；來源頁現行版本另有 Terfili 的錄音。
 
 播放器在單字、字母名、音素之間保留約 160 ms 間隔；沒有把 `/æ/` 轉成字母 A，也沒有要求 TTS 猜測 IPA。17 個短檔約 170 KiB，可離線播放。各錄音由不同講者提供，音色與口音可能略有差異。
