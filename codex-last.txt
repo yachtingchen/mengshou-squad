@@ -1,0 +1,10 @@
+2026-10-25｜英文字母魔法卡牌對戰 MVP 完成
+
+已依 NEW_GAME_SHARE.md 改為繁中、純靜態 A～E 字母森林遊戲。第 1 階段顯示單字／兩選一；第 2 階段隱藏單字／三選一、打亂怪物順序。可無限重聽，答錯溫和重試，答對施法、怪物消失、進度慶祝，並呈現外形／字母名／開頭音／單字。支援觸控、鍵盤與減少動態效果。未做升級、圖鑑收藏或第三階段。
+
+圖：原創精緻 SVG 五隻怪物、分層森林與魔杖，沒有 emoji 拼貼或外部圖片依賴。
+音：17 個隨附真人 MP3（約 166 KiB），字母名、IPA 音素、單字分開播放；不用 Web Speech API。錄音經裁切、統一響度及 MP3 轉換，B/C/D 採短子音段；戰鬥音效以 Web Audio 合成。作者、來源與公有領域／CC BY-SA 3.0 授權及改作聲明列於 assets/CREDITS.md、credits.html。
+
+驗證：node tests/game.test.js，11/11 通過。Chrome 實測兩階段各五隻通關、錯誤重試、完整教學、播放中止、17 檔解碼及真實重聽播放、五種尺寸（320／390／768／844／1280）無橫向溢出、減少動態效果、動畫中切換階段皆通過。離線 file:// 開檔可播放及施法；/mengshou-squad/ 子路徑的圖片、音訊、來源頁均正常。JS 語法、SVG XML 與 git diff --check 通過。
+
+README、GAME_RULES 已更新，可直接開 index.html 或使用 python3 -m http.server 8080。沿用原 GitHub Pages 路徑；staticwebapp.config.json 原樣保留。只修改工作區，沒有 git push 或更改 remote。

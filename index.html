@@ -1,3 +1,33 @@
 <!doctype html>
-<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#234d3c"><title>萌獸小隊：智慧卡牌大對戰</title><link rel="stylesheet" href="style.css"></head>
-<body><header><a class="brand" href="index.html">🌱 萌獸小隊 <small>智慧卡牌大對戰</small></a><button id="help" class="quiet">？ 怎麼玩</button></header><main id="app"></main><dialog id="rules"><h2>🌟 一回合，一個好點子</h2><p>家長先選牌，再交給孩子。兩人選好後一起揭曉！公開意圖開啟時，孩子可以先看家長的選擇。</p><p>🐾 小攻擊：傷害 1、能量 +1<br>🛡️ 防護罩：抵擋 2、能量 +1<br>✨ 集氣：能量 +2<br>🌟 超級絕招：花 2 能量，傷害 3</p><p>每次只有三張牌。能量到 2，集氣就會換成絕招。能量最多 3，護盾只保護當回合。</p><p>雙方同時扣血，再增加能量。生命歸零就結束，兩邊同時歸零是平手。沒有時間限制，慢慢想！</p><p>屬性優勢：🔥 → 🌿 → 💧 → 🔥，有優勢的小攻擊變成 2 點，絕招仍為 3 點。</p><form method="dialog"><button class="primary">知道了，出發！</button></form></dialog><footer>一起觀察，一起想想，一起變厲害。<span>適合 4–6 歲 · 無時間限制</span></footer><script src="game.js"></script><script src="app.js"></script></body></html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f8f7ef">
+  <meta name="description" content="走進字母森林，用 A～E 字母魔法卡打敗可愛單字怪物。適合 4～6 歲的英文發音小冒險。">
+  <title>萌獸小隊｜英文字母魔法卡牌對戰</title>
+  <link rel="icon" href="assets/art/wand.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js" defer></script>
+  <script src="audio.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html"><img src="assets/art/wand.svg" alt="" width="43" height="43"><span>萌獸小隊<small>英文字母魔法卡牌對戰</small></span></a>
+    <div class="header-actions"><button id="effects" class="quiet" aria-pressed="true">音效：開</button><button id="help" class="help-button"><span aria-hidden="true">?</span> 怎麼玩</button></div>
+  </header>
+  <main id="app"></main>
+  <p id="audio-status" class="audio-status" role="status" aria-live="polite"></p>
+  <footer><span>小小的聲音，大大的魔法。</span><span>A–E 字母冒險 <i>·</i> 適合 4–6 歲 <i>·</i> 慢慢玩，不用急</span><a href="credits.html">插畫與聲音來源</a></footer>
+  <dialog id="rules" aria-labelledby="rules-title">
+    <form method="dialog"><button class="dialog-close" aria-label="關閉玩法說明">×</button></form>
+    <div class="eyebrow">給小小魔法師與陪玩的你</div><h2 id="rules-title">一張字母卡，就是一個魔法！</h2>
+    <ol><li><b>先聽聽：</b>點怪物或「再聽一次」，聽單字和開頭的聲音。想聽幾次都可以。</li><li><b>挑魔法：</b>點卡牌下的「聽字母」，分開聽字母名與開頭音；點大字母卡施法！</li><li><b>再出發：</b>選對了，一起看看字母和單字的關係，再按「下一隻」。選錯也沒關係，可以再選。</li></ol>
+    <div class="parent-note"><b>字母名 ≠ 開頭音</b><p><span lang="en">A /eɪ/</span> 是字母的名字；<span lang="en">apple</span> 的開頭音是 <span lang="en">/æ/</span>。我們使用分開的真人錄音，不會把音標文字交給電腦猜讀。</p><p><span lang="en">C</span> 在 <span lang="en">cat</span> 中發 <span lang="en">/k/</span>；字母在其他單字可能發不同的音。</p></div>
+    <p>第 1 階段看單字、選兩張牌；第 2 階段先聽音、選三張牌，答對後才顯示單字。切換階段會重新開始。請開啟裝置聲音。</p>
+    <form method="dialog"><button class="primary">知道了，來施魔法！ <span aria-hidden="true">✦</span></button></form>
+  </dialog>
+  <noscript><p class="noscript">請開啟瀏覽器的 JavaScript，讓字母魔法動起來。</p></noscript>
+</body>
+</html>

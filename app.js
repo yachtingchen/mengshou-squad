@@ -1,61 +1,122 @@
-const { monsters, cards, available, advantage, resolve, intent } = Game;
-const app = document.getElementById('app');
-let mode = 'family', picks = [0, 1], publicIntent = true, elements = false, level = 1, state;
-const button = (text, action, cls = '') => `<button class="${cls}" data-action="${action}">${text}</button>`;
-document.getElementById('help').onclick = () => document.getElementById('rules').showModal();
-app.addEventListener('click', event => {
-  const target = event.target.closest('[data-action]'); if (!target) return;
-  const [action, value, extra] = target.dataset.action.split(':');
-  if (action === 'mode') { mode = value; home(); }
-  if (action === 'pick') { picks[Number(value)] = Number(extra); home(); }
-  if (action === 'start') { level = 1; start(); }
-  if (action === 'choose') choose(value);
-  if (action === 'next') { state.round++; state.phase = 'parent'; state.actions = []; battle(); }
-  if (action === 'home') home();
-  if (action === 'retry') start();
-  if (action === 'level') { level++; start(); }
-});
-app.addEventListener('change', event => {
-  if (event.target.id === 'public') publicIntent = event.target.checked;
-  if (event.target.id === 'elements') elements = event.target.checked;
-});
-function picker(index, label) {
-  return `<section class="picker"><h3>${label}</h3><div class="monster-options">${monsters.map((m, n) => `<button class="monster-option ${m.color} ${picks[index] === n ? 'selected' : ''}" data-action="pick:${index}:${n}" aria-pressed="${picks[index] === n}"><span class="monster-emoji">${m.emoji}</span><b>${m.name}</b><small>${m.symbol} ${picks[index] === n ? '已選擇 ✓' : '選我'}</small></button>`).join('')}</div></section>`;
-}
-function home() {
-  state = null;
-  app.innerHTML = `<section class="intro"><div class="eyebrow">THE LITTLE THINKERS CLUB</div><h1>小小萌獸，<br>大大的好點子<span> ✦</span></h1><p>出一張牌，想一想。和你的隊友來場智慧對決！</p><div class="hero-friends">🦊 <span>✦</span> 🐻‍❄️ <span>✦</span> 🦌</div></section><section class="setup"><div class="section-title"><span class="step">1</span><h2>今天和誰一起玩？</h2></div><div class="mode-options">${button('👨‍👧 親子對戰 <small>同一台裝置，輪流出牌</small>', 'mode:family', mode === 'family' ? 'active' : '')}${button('🤖 對戰電腦 <small>觀察意圖，挑戰八關</small>', 'mode:computer', mode === 'computer' ? 'active' : '')}</div><div class="section-title"><span class="step">2</span><h2>選你的萌獸夥伴</h2></div><div class="pickers">${picker(0, mode === 'family' ? '👋 家長的夥伴' : '👋 你的夥伴')}${mode === 'family' ? picker(1, '🌼 孩子的夥伴') : '<div class="computer-note">🤖<h3>森林闖關之旅</h3><p>八個關卡，從簡單開始。<br>電腦會先告訴你想做什麼！</p></div>'}</div><div class="settings">${mode === 'family' ? `<label><input id="public" type="checkbox" ${publicIntent ? 'checked' : ''}> 👀 公開意圖 <small>讓孩子先看看家長的選擇</small></label><label><input id="elements" type="checkbox" ${elements ? 'checked' : ''}> 🌈 屬性相剋 <small>火 → 草 → 水 → 火</small></label>` : '<p>🌈 第 5 關起加入屬性相剋：火 → 草 → 水 → 火</p>'}</div>${button('一起出發！ <span>→</span>', 'start', 'primary start')}<p class="hint">♡ 輸贏都沒關係，每一場都有新發現。</p></section>`;
-}
-function start() {
-  const opponent = mode === 'family' ? picks[1] : (level - 1) % 3;
-  state = { round: 1, phase: 'parent', actions: [], players: [picks[0], opponent].map(n => ({ ...monsters[n], hp: 6, energy: 0 })), outcome: null, result: null };
-  battle();
-}
-function names() { return mode === 'family' ? ['家長', '孩子'] : ['你', '電腦']; }
-function elementOn() { return mode === 'family' ? elements : level >= 5; }
-function fighter(p, i) {
-  return `<section class="fighter ${p.color} ${p.hp === 0 ? 'fainted' : ''}"><div class="fighter-top"><span>${names()[i]}的夥伴</span><b>${p.symbol} ${p.name}</b></div><div class="avatar">${p.emoji}</div><div class="health" aria-label="生命 ${p.hp} / 6">${Array.from({length: 6}, (_, n) => `<span class="${n < p.hp ? '' : 'empty'}">♥</span>`).join('')}<b>${p.hp}/6</b></div><div class="energy" aria-label="能量 ${p.energy} / 3">${Array.from({length: 3}, (_, n) => `<span class="${n < p.energy ? 'filled' : ''}">⚡</span>`).join('')}<small>能量 ${p.energy}/3</small></div>${elementOn() && advantage(p.element, state.players[1-i].element) ? '<div class="advantage">屬性優勢 · 小攻擊 2 點</div>' : ''}</section>`;
-}
-function battle() {
-  const done = state.phase === 'reveal';
-  const active = mode === 'family' && state.phase === 'child' ? 1 : 0;
-  const ai = mode === 'computer' ? intent(level, state.round) : null;
-  let announcement = mode === 'computer' ? `🤖 電腦預告：${cards[ai].emoji} ${cards[ai].name}${cards[ai].damage ? ' · 傷害 ' + cards[ai].damage : ai === 'defend' ? ' · 抵擋 2' : ' · 不攻不防'}` : state.phase === 'child' ? publicIntent ? `👀 家長的意圖：${cards[state.actions[0]].emoji} ${cards[state.actions[0]].name}` : '🙈 家長已選好！選擇先保密。' : '👋 家長先選一張牌，再交給孩子';
-  app.innerHTML = `<div class="battle-heading"><div><div class="eyebrow">${mode === 'family' ? 'FAMILY BATTLE · 親子對戰' : `FOREST ADVENTURE · 第 ${level} / 8 關`}</div><h1>第 ${state.round} 回合 <span class="round-leaf">🌿</span></h1></div>${button('⌂ 回到首頁', 'home', 'quiet')}</div><div class="arena">${fighter(state.players[0], 0)}<div class="versus">VS<small>${elementOn() ? '🌈 屬性開啟' : '公平出發'}</small></div>${fighter(state.players[1], 1)}</div>${done ? reveal() : `<div class="intent" role="status">${announcement}</div><section class="action-area"><h2>${mode === 'family' ? active === 0 ? '👋 家長，輪到你囉！' : '🌼 請把裝置交給孩子，輪到你囉！' : '💡 看看意圖，你想怎麼做？'}</h2><p>點一張就選好 · 不用急，慢慢想</p><div class="cards">${available(state.players[active].energy).map(key => `<button class="card ${key}" data-action="choose:${key}"><span class="card-icon">${cards[key].emoji}</span><h3>${cards[key].name}</h3><b>${key === 'attack' && elementOn() && advantage(state.players[active].element, state.players[1-active].element) ? '傷害 2 · 屬性優勢' : cards[key].detail}</b><small>${cards[key].energy}</small><span class="card-select">選這張 →</span></button>`).join('')}</div></section>`}`;
-}
-function choose(key) {
-  if (!state || state.phase === 'reveal') return;
-  const active = state.phase === 'child' ? 1 : 0;
-  if (!available(state.players[active].energy).includes(key)) return;
-  if (mode === 'family' && active === 0) { state.actions[0] = key; state.phase = 'child'; battle(); return; }
-  if (mode === 'family') state.actions[1] = key;
-  else state.actions = [key, intent(level, state.round)];
-  state.outcome = resolve(state.players, state.actions, elementOn());
-  state.players = state.outcome.players; state.result = state.outcome.result; state.phase = 'reveal'; battle();
-}
-function reveal() {
-  const result = state.result;
-  const title = result === null ? '一起揭曉！' : result === 'draw' ? '🤝 平手！兩位都好棒' : mode === 'family' ? `🎉 ${names()[result]}獲勝！` : result === 0 ? level === 8 ? '🏆 八關完成！智慧小達人！' : '🎉 挑戰成功！' : '🌱 再想一個好點子！';
-  return `<section class="reveal" aria-live="polite"><h2>${title}</h2><div class="reveal-cards">${state.actions.map((a, i) => `<div><span>${cards[a].emoji}</span><b>${names()[i]}：${cards[a].name}</b><small>受到 ${state.outcome.damage[1-i]} 點傷害 · 生命 ${state.players[i].hp} · 能量 ${state.players[i].energy}</small></div>`).join('')}</div><p>${result === null ? '護盾已消失。看看現在的能量，再想想下一步！' : '謝謝你的好點子！每一次選擇，都是一次練習。'}</p><div class="result-buttons">${result === null ? button('下一回合 →', 'next', 'primary') : `${mode === 'computer' && result === 0 && level < 8 ? button('下一關 →', 'level', 'primary') : ''}${button('🔄 再玩一次', 'retry', 'primary')}${button('換個夥伴', 'home', 'quiet')}`}</div><details><summary>看看結算順序</summary><p>① 扣除絕招能量 → ② 計算傷害與屬性 → ③ 護盾抵擋最多 2 → ④ 同時扣生命 → ⑤ 增加能量，上限 3 → ⑥ 判斷勝負</p></details></section>`;
-}
-home();
+/* No imports/fetch/build step: opening index.html works directly. */
+(() => {
+  'use strict';
+  const app = document.getElementById('app');
+  const audioStatus = document.getElementById('audio-status');
+  const sound = new ForestAudio(message => { audioStatus.textContent = message; });
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let state = Game.create(1);
+  let offered = Game.choices(state);
+  let busy = false;
+  let timers = [];
+  let scene = 0;
+  const speaker = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4zM17 8q5 4 0 8m3-11q8 7 0 14"/></svg>';
+  const star = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3 6 7 1-5 5 1 8-6-4-6 4 1-8-5-5 7-1Z"/></svg>';
+  const later = (callback, delay) => {
+    const id = scene;
+    timers.push(setTimeout(() => { if (id === scene) callback(); }, delay));
+  };
+  function cancelScene() {
+    scene++;
+    timers.forEach(clearTimeout); timers = [];
+    sound.stop(); busy = false;
+  }
+  function stageNav() {
+    return `<nav class="stage-nav" aria-label="選擇遊戲階段">${[1, 2].map(n => `<button data-action="stage" data-value="${n}" aria-current="${state.stage === n ? 'step' : 'false'}"><span class="stage-number">0${n}</span><span>第 ${n} 階段<b>${Game.stages[n].title}</b></span><span class="stage-check" aria-hidden="true">${state.stage === n ? '●' : '→'}</span></button>`).join('')}</nav>`;
+  }
+  function heading() {
+    return `<section class="page-heading"><div><div class="eyebrow"><span class="tiny-spark">✦</span> A LITTLE MAGIC, A LITTLE ENGLISH</div><h1>小小魔法師，出發！</h1><p>聽聽怪物的名字，用字母魔法讓森林閃閃發光。</p></div><div class="adventure-seal"><span>Aa</span><small>每天一點小魔法</small></div></section>${stageNav()}`;
+  }
+  function progress() {
+    return `<div class="progress"><span>打敗怪物 <b>${state.defeated}<small> / 5</small></b></span><div class="progress-stars" aria-hidden="true">${Game.monsters.map((_, i) => `<span class="${i < state.defeated ? 'earned' : ''}">${star}</span>`).join('')}</div></div>`;
+  }
+  function card(m, index) {
+    return `<div class="card-wrap ${m.color}" style="--card-index:${index}"><button class="letter-card" data-action="choose" data-value="${m.letter}" aria-label="施放 ${m.letter} 字母魔法"><span class="card-corner" aria-hidden="true">✧</span><span class="card-kind">字母魔法</span><span class="letter-shapes" lang="en">${m.letter}<span>${m.lower}</span></span><span class="card-name">字母名 <span lang="en">/${m.nameIPA}/</span></span><span class="cast-label">施放魔法 <span aria-hidden="true">↗</span></span></button><button class="listen-card" data-action="hear-card" data-value="${m.letter}" aria-label="聽 ${m.letter} 的字母名和開頭音">${speaker}<span>聽字母</span></button></div>`;
+  }
+  function render(focus = false) {
+    if (state.phase === 'complete') return complete();
+    const m = Game.current(state);
+    const rule = Game.stages[state.stage];
+    app.innerHTML = `${heading()}<section class="battle-shell" aria-label="字母森林戰鬥"><div class="battle-bar"><div><span class="location-dot" aria-hidden="true"></span><h2>第 1 關：字母森林</h2><span class="round-label">第 ${state.index + 1} 隻</span></div>${progress()}</div><div class="arena"><div class="arena-caption"><span>FOREST OF LETTERS</span><span class="stage-badge">${rule.showWord ? '看一看 · 聽一聽' : '仔細聽 · 找字母'}</span></div><div class="monster-zone"><div class="monster-bubble">${rule.showWord ? '聽聽我的名字！' : '你聽得出來嗎？'}</div><button class="monster" data-action="hear-monster" aria-label="重聽單字怪物的名字與開頭音"><img src="assets/art/${m.word}.svg" alt="可愛的單字怪物" width="360" height="340" draggable="false"></button><div class="magic-ring" aria-hidden="true"></div><div class="monster-name">${rule.showWord ? `<b lang="en">${m.word}</b>` : '<span>神祕單字怪物</span>'}</div><button class="replay" data-action="hear-monster">${speaker} 再聽一次</button></div><div class="forest-note"><span aria-hidden="true">✧</span> 點怪物也可以重聽喔</div><div class="spell-projectile" aria-hidden="true">✦</div><div class="hit-burst" aria-hidden="true"></div></div><section class="spell-table"><div id="feedback" class="instruction" role="status" aria-live="polite"><h2>哪張字母卡，能施放魔法？</h2><p>${rule.showWord ? '找出單字開頭的字母，點一下大卡牌！' : '先聽單字與開頭音，再點一下大卡牌！'}</p></div><div class="cards cards-${rule.cardCount}">${offered.map(card).join('')}</div><div id="learning" class="learning" hidden></div><p class="gentle-note"><span aria-hidden="true">♡</span> 選錯也沒關係，再聽一次就好。</p></section></section><div class="journey-note"><span class="note-icon" aria-hidden="true">✦</span><span><b>今天的小任務</b>認識 A、B、C、D、E，讓 5 隻單字怪物變成亮亮星光。</span><button class="text-button" data-action="restart">重新開始 ↻</button></div>`;
+    if (focus) app.querySelector('.monster').focus({ preventScroll: true });
+  }
+  function start(stage) {
+    cancelScene(); state = Game.create(stage); offered = Game.choices(state);
+    render(true); sound.unlock();
+    sound.monster(Game.current(state), Game.stages[stage].showWord);
+  }
+  function choose(letter, target) {
+    if (busy || state.phase !== 'question') return;
+    const outcome = Game.answer(state, letter, offered.map(m => m.letter));
+    if (outcome.result === 'ignored') return;
+    sound.stop(); state = outcome.state;
+    const feedback = document.getElementById('feedback');
+    if (outcome.result === 'retry') {
+      busy = true;
+      sound.effect('retry'); target.classList.add('try-again');
+      feedback.innerHTML = '<h2>差一點點，再聽聽看！</h2><p>魔法還在，慢慢選就好。點怪物可以再聽一次。</p>';
+      feedback.classList.add('retry-message');
+      later(() => { target.classList.remove('try-again'); busy = false; }, reducedMotion.matches ? 100 : 450);
+      return;
+    }
+    busy = true;
+    const m = Game.current(state);
+    sound.effect('select');
+    target.classList.add('casting');
+    app.querySelectorAll('.letter-card, .listen-card').forEach(button => { button.disabled = true; });
+    app.querySelector('.arena').classList.add('spell-active');
+    feedback.classList.remove('retry-message');
+    feedback.innerHTML = '<h2>字母魔法，出發！</h2><p>閃閃發光的咒語飛向怪物了！</p>';
+    later(() => {
+      sound.effect('hit'); app.querySelector('.monster').classList.add('defeated');
+    }, reducedMotion.matches ? 50 : 360);
+    later(() => {
+      busy = false;
+      app.querySelector('.battle-bar .progress').outerHTML = progress();
+      app.querySelector('.monster-name').innerHTML = `<b lang="en">${m.word}</b>`;
+      app.querySelector('.monster-bubble').textContent = '魔法成功！';
+      feedback.innerHTML = `<h2>答對了！${m.letter} 的魔法好厲害！</h2><p>你讓單字怪物變成星光了！</p>`;
+      const learning = document.getElementById('learning');
+      learning.hidden = false;
+      learning.innerHTML = `<div class="connection"><span><small>字母外形</small><b lang="en">${m.letter}${m.lower}</b></span><span><small>字母名</small><b lang="en">/${m.nameIPA}/</b></span><span><small>開頭音</small><b lang="en">/${m.soundIPA}/</b></span><span><small>單字</small><b lang="en">${m.word}</b></span></div><div class="learning-actions"><button class="quiet" data-action="hear-reward">${speaker} 聽聽魔法口訣</button><button class="primary" data-action="next">${state.defeated === 5 ? '看看冒險成果' : '下一隻怪物'} <span aria-hidden="true">→</span></button></div>`;
+      app.querySelector('.cards').hidden = true;
+      app.querySelector('[data-action="next"]').focus({ preventScroll: true });
+      sound.reward(m);
+    }, reducedMotion.matches ? 120 : 900);
+  }
+  function complete() {
+    const nextStage = state.stage === 1 ? 2 : 1;
+    app.innerHTML = `${heading()}<section class="completion"><div class="completion-stars" aria-hidden="true">✦ <span>✦</span> ✦</div><div class="eyebrow">FOREST ADVENTURE COMPLETE</div><h2 tabindex="-1">你讓整座森林亮起來了！</h2><p>第 ${state.stage} 階段完成 · 5 / 5 隻怪物都變成星光了。</p><div class="friends" aria-hidden="true">${Game.monsters.map(m => `<img src="assets/art/${m.word}.svg" alt="" width="150" height="142">`).join('')}</div><p class="completion-word" lang="en">A a · B b · C c · D d · E e</p><div class="complete-actions"><button class="primary" data-action="stage" data-value="${nextStage}">${state.stage === 1 ? '挑戰第 2 階段：聽音辨字' : '回到第 1 階段：認識字母'} <span aria-hidden="true">→</span></button><button class="quiet" data-action="restart">再玩一次 ↻</button></div><p class="gentle-note">每一次聆聽，都長出一點點新魔法。</p></section>`;
+    app.querySelector('.completion h2').focus({ preventScroll: true });
+    sound.effect('win');
+  }
+  app.addEventListener('click', event => {
+    const target = event.target.closest('[data-action]');
+    if (!target || target.disabled) return;
+    sound.unlock();
+    const action = target.dataset.action;
+    if (action === 'stage') start(Number(target.dataset.value));
+    if (action === 'restart') start(state.stage);
+    if (action === 'hear-card') sound.card(Game.monsters.find(m => m.letter === target.dataset.value));
+    if (action === 'hear-monster' && !busy) sound.monster(Game.current(state), Game.stages[state.stage].showWord || state.phase !== 'question');
+    if (action === 'hear-reward') sound.reward(Game.current(state));
+    if (action === 'choose') choose(target.dataset.value, target);
+    if (action === 'next' && !busy && state.phase === 'celebration') {
+      cancelScene(); state = Game.next(state);
+      offered = Game.choices(state); render(true);
+      if (state.phase !== 'complete') sound.monster(Game.current(state), Game.stages[state.stage].showWord);
+    }
+  });
+  document.getElementById('effects').addEventListener('click', event => {
+    sound.unlock(); sound.effects = !sound.effects;
+    event.currentTarget.setAttribute('aria-pressed', String(sound.effects));
+    event.currentTarget.textContent = `音效：${sound.effects ? '開' : '關'}`;
+    if (sound.effects) sound.effect('select');
+  });
+  document.getElementById('help').addEventListener('click', () => {
+    sound.stop(); document.getElementById('rules').showModal();
+  });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) sound.stop(); });
+  window.addEventListener('pagehide', () => sound.stop());
+  render();
+})();
