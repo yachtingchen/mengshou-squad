@@ -299,7 +299,8 @@ h1 {
   animation:star-pop .5s ease-out;
 }
 .arena {
-  height:325px;
+  /* Let the full monster stack, including replay, determine the arena height. */
+  min-height:325px;
   background:#e8eedc url('assets/art/forest.svg') center 52%/cover no-repeat;
   position:relative;
   overflow:hidden;
@@ -330,8 +331,7 @@ h1 {
   display:flex;
   align-items:center;
   flex-direction:column;
-  height:100%;
-  padding-top:19px;
+  padding:19px 0 16px;
 }
 .monster-bubble {
   background:#fffef2;
@@ -464,7 +464,8 @@ h1 {
   border:1px solid #bacba6;
   border-radius:30px;
   padding:6px 15px;
-  min-height:36px;
+  min-height:44px;
+  flex-shrink:0;
   font-size:12px;
   margin-top:7px;
   z-index:2;
@@ -1211,7 +1212,7 @@ dialog .primary {
     height:14px;
   }
   .arena {
-    height:302px;
+    min-height:302px;
     background-size:auto 100%;
     background-position:center;
   }
@@ -1498,7 +1499,7 @@ dialog .primary {
     display:none;
   }
   .arena {
-    height:275px;
+    min-height:275px;
   }
   .monster {
     height:181px;

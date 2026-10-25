@@ -17,7 +17,7 @@ test('A～E 清楚對應五個單字，字母名與自然發音分開', () => {
     assert.notEqual(m.nameIPA, m.soundIPA);
   }
 });
-test('階段 1 顯示單字兩選一；階段 2 隱藏單字三選一', () => {
+test('階段 1 保留單字音訊旗標兩選一；階段 2 聽音辨字三選一', () => {
   assert.equal(G.stages[1].showWord, true);
   assert.equal(G.stages[2].showWord, false);
   for (const stage of [1, 2]) {

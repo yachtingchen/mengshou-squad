@@ -40,13 +40,14 @@
     if (state.phase === 'complete') return complete();
     const m = Game.current(state);
     const rule = Game.stages[state.stage];
-    app.innerHTML = `${heading()}<section class="battle-shell" aria-label="字母森林戰鬥"><div class="battle-bar"><div><span class="location-dot" aria-hidden="true"></span><h2>第 1 關：字母森林</h2><span class="round-label">第 ${state.index + 1} 隻</span></div>${progress()}</div><div class="arena"><div class="arena-caption"><span>FOREST OF LETTERS</span><span class="stage-badge">${rule.showWord ? '看一看 · 聽一聽' : '仔細聽 · 找字母'}</span></div><div class="monster-zone"><div class="monster-bubble">${rule.showWord ? '聽聽我的名字！' : '你聽得出來嗎？'}</div>${monsterFigure(m)}<div class="magic-ring" aria-hidden="true"></div><div class="monster-name">${rule.showWord ? `<b lang="en">${m.word}</b>` : '<span>神祕單字怪物</span>'}</div><button class="replay" data-action="hear-monster">${speaker} 再聽一次</button></div><div class="forest-note"><span aria-hidden="true">✧</span> 點怪物也可以重聽喔</div><div class="spell-projectile" aria-hidden="true">✦</div><div class="hit-burst" aria-hidden="true"></div></div><section class="spell-table"><div id="feedback" class="instruction" role="status" aria-live="polite"><h2>哪張字母卡，能施放魔法？</h2><p>${rule.showWord ? '找出單字開頭的字母，點一下大卡牌！' : '先聽單字與開頭音，再點一下大卡牌！'}</p></div><div class="cards cards-${rule.cardCount}">${offered.map(card).join('')}</div><div id="learning" class="learning" hidden></div><p class="gentle-note"><span aria-hidden="true">♡</span> 選錯也沒關係，再聽一次就好。</p></section></section><div class="journey-note"><span class="note-icon" aria-hidden="true">✦</span><span><b>今天的小任務</b>認識 A、B、C、D、E，讓 5 隻單字怪物變成亮亮星光。</span><button class="text-button" data-action="restart">重新開始 ↻</button></div>`;
+    app.innerHTML = `${heading()}<section class="battle-shell" aria-label="字母森林戰鬥"><div class="battle-bar"><div><span class="location-dot" aria-hidden="true"></span><h2>第 1 關：字母森林</h2><span class="round-label">第 ${state.index + 1} 隻</span></div>${progress()}</div><div class="arena"><div class="arena-caption"><span>FOREST OF LETTERS</span><span class="stage-badge">${rule.showWord ? '聽開頭音 · 選卡牌' : '仔細聽 · 找字母'}</span></div><div class="monster-zone"><div class="monster-bubble">${rule.showWord ? '聽聽我的名字！' : '你聽得出來嗎？'}</div>${monsterFigure(m)}<div class="magic-ring" aria-hidden="true"></div><div class="monster-name"><span>神祕單字怪物</span></div><button class="replay" data-action="hear-monster">${speaker} 再聽一次</button></div><div class="forest-note"><span aria-hidden="true">✧</span> 點怪物也可以重聽喔</div><div class="spell-projectile" aria-hidden="true">✦</div><div class="hit-burst" aria-hidden="true"></div></div><section class="spell-table"><div id="feedback" class="instruction" role="status" aria-live="polite"><h2>哪張字母卡，能施放魔法？</h2><p>${rule.showWord ? '聽單字的開頭音，再選一張字母卡！' : '先聽單字與開頭音，再點一下大卡牌！'}</p></div><div class="cards cards-${rule.cardCount}">${offered.map(card).join('')}</div><div id="learning" class="learning" hidden></div><p class="gentle-note"><span aria-hidden="true">♡</span> 選錯也沒關係，再聽一次就好。</p></section></section><div class="journey-note"><span class="note-icon" aria-hidden="true">✦</span><span><b>今天的小任務</b>認識 A、B、C、D、E，讓 5 隻單字怪物變成亮亮星光。</span><button class="text-button" data-action="restart">重新開始 ↻</button></div>`;
     if (focus) app.querySelector('.monster').focus({ preventScroll: true });
   }
   function start(stage) {
     cancelScene(); state = Game.create(stage); offered = Game.choices(state);
     render(true); sound.unlock();
-    sound.monster(Game.current(state), Game.stages[stage].showWord);
+    // 單字音訊照常播放，出題時只隱藏答案字幕。
+    sound.monster(Game.current(state), false);
   }
   function choose(letter, target) {
     if (busy || state.phase !== 'question') return;
@@ -85,7 +86,7 @@
     later(() => {
       busy = false;
       app.querySelector('.battle-bar .progress').outerHTML = progress();
-      app.querySelector('.monster-name').innerHTML = `<b lang="en">${m.word}</b>`;
+      app.querySelector('.monster-name').innerHTML = '<span>字母魔法成功！</span>';
       app.querySelector('.replay').dataset.action = 'hear-reward';
       app.querySelector('.forest-note').innerHTML = '<span aria-hidden="true">✧</span> 點字母也可以重聽口訣喔';
       feedback.innerHTML = `<h2>答對了！${m.letter} 的魔法好厲害！</h2><p>你讓單字怪物變成星光了！</p>`;
@@ -111,13 +112,13 @@
     if (action === 'stage') start(Number(target.dataset.value));
     if (action === 'restart') start(state.stage);
     if (action === 'hear-card') sound.card(Game.monsters.find(m => m.letter === target.dataset.value));
-    if (action === 'hear-monster' && !busy) sound.monster(Game.current(state), Game.stages[state.stage].showWord || state.phase !== 'question');
+    if (action === 'hear-monster' && !busy) sound.monster(Game.current(state), state.phase !== 'question');
     if (action === 'hear-reward' && !busy && state.phase === 'celebration') sound.reward(Game.current(state));
     if (action === 'choose') choose(target.dataset.value, target);
     if (action === 'next' && !busy && state.phase === 'celebration') {
       cancelScene(); state = Game.next(state);
       offered = Game.choices(state); render(true);
-      if (state.phase !== 'complete') sound.monster(Game.current(state), Game.stages[state.stage].showWord);
+      if (state.phase !== 'complete') sound.monster(Game.current(state), false);
     }
   });
   document.getElementById('effects').addEventListener('click', event => {
